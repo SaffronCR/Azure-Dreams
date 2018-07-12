@@ -25,6 +25,9 @@ public class Dungeon : MonoBehaviour
     {
         public RoomType type;
 
+        public bool startingPos;
+        public bool hasTeleport;
+
         // Directions: 0 UP, 1 RIGHT, 3 DOWN, 4 LEFT.
         public bool[] conn = new bool[4];
 
@@ -250,18 +253,36 @@ public class Dungeon : MonoBehaviour
         }
 
         // Add some additional random connections.
-        for (int i = Random.Range(0, numRndConn + 1); i > 0; i--)
+        //for (int i = Random.Range(0, numRndConn + 1); i > 0; i--)
+        //{
+        //    // Get a random room/corridor who has available connections.
+        //    posX = Random.Range(0, gridSize);
+        //    posY = Random.Range(0, gridSize);
+
+        //    if ((roomMap[posX, posY].type == RoomType.RT_ROOM || roomMap[posX, posY].type == RoomType.RT_CORRIDOR)
+        //        && HasAvailableConnections(posX, posY) == true)
+        //    {
+        //        CalculateValidPath(posX, posY);
+        //    }
+        //}
+
+        // Select random initial position.
+        do
         {
-            // Get a random room/corridor who has available connections.
             posX = Random.Range(0, gridSize);
             posY = Random.Range(0, gridSize);
+        } while (roomMap[posX, posY].type != RoomType.RT_ROOM);
 
-            if ((roomMap[posX, posY].type == RoomType.RT_ROOM || roomMap[posX, posY].type == RoomType.RT_CORRIDOR)
-                && HasAvailableConnections(posX, posY) == true)
-            {
-                CalculateValidPath(posX, posY);
-            }
-        }
+        roomMap[posX, posY].startingPos = true;
+
+        // Select random teleport position.
+        do
+        {
+            posX = Random.Range(0, gridSize);
+            posY = Random.Range(0, gridSize);
+        } while (roomMap[posX, posY].type != RoomType.RT_ROOM);
+
+        roomMap[posX, posY].hasTeleport = true;
 
         Debug.Log("Dungeon generation finished");
 
@@ -325,7 +346,19 @@ public class Dungeon : MonoBehaviour
                 }
 
                 // Draw center.
-                if (roomMap[i, j].type == RoomType.RT_ROOM)
+                if (roomMap[i, j].startingPos && roomMap[i, j].hasTeleport)
+                {
+                    asciiMap[mapX, mapY] = "&";
+                }
+                else if (roomMap[i, j].startingPos)
+                {
+                    asciiMap[mapX, mapY] = "@";
+                }
+                else if (roomMap[i, j].hasTeleport)
+                {
+                    asciiMap[mapX, mapY] = "T";
+                }
+                else if (roomMap[i, j].type == RoomType.RT_ROOM)
                 {
                     asciiMap[mapX, mapY] = "▓";
                 }
